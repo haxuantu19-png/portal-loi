@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal tra cứu 24 lỗi (Ép–Sấy–Men màu–Lò nung)</title>
+<style>
+  :root {
+    --bg:#0b0f14; --card:#121821; --muted:#8aa0b2; --text:#e9f1f7; --accent:#2dd4bf; --accent2:#60a5fa; --danger:#f87171;
+  }
+  * { box-sizing: border-box }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); }
+  header { position:sticky; top:0; background:linear-gradient(180deg, rgba(11,15,20,.95), rgba(11,15,20,.65)); backdrop-filter: blur(8px); z-index:10; }
+  .wrap { max-width:1100px; margin:0 auto; padding:16px 20px; }
+  h1 { margin:6px 0 2px; font-size:22px }
+  .sub { color:var(--muted); font-size:13px }
+  .searchbox { margin-top:12px; display:flex; gap:10px }
+  input[type=search] {
+    flex:1; padding:12px 14px; border-radius:14px; border:1px solid #223042; background:#0f151d; color:var(--text);
+    outline:none; box-shadow: inset 0 0 0 1px rgba(45,212,191,.15);
+  }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:14px; padding:16px 20px; }
+  .card { background:var(--card); border:1px solid #1d2735; border-radius:16px; padding:14px; transition: transform .08s ease, box-shadow .08s ease; cursor:pointer }
+  .card:hover { transform: translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,.25) }
+  .code { font-weight:700; color:var(--accent); font-size:14px }
+  .name { font-size:16px; margin:6px 0 2px; line-height:1.25 }
+  .muted { color:var(--muted); font-size:12px }
+  dialog::backdrop { background: rgba(0,0,0,.55) }
+  dialog { width:min(900px, 96vw); border:none; background:#091018; color:var(--text); border-radius:18px; padding:0; }
+  .dlg-header { padding:14px 16px; border-bottom:1px solid #1a2330; display:flex; align-items:center; gap:10px }
+  .tag { padding:2px 8px; border-radius:999px; background:rgba(45,212,191,.12); color:var(--accent); font-size:12px; border:1px solid rgba(45,212,191,.35) }
+  .dlg-body { padding:14px 16px; max-height:70vh; overflow:auto }
+  .cols { display:grid; grid-template-columns: 210px 1fr; gap:16px }
+  .imgph { width:100%; height:180px; border-radius:12px; overflow:hidden; background:#0e1620; border:1px dashed #2b3a50; display:grid; place-items:center; color:#6b8298; font-size:12px }
+  .sec h3 { margin:10px 0 6px; font-size:14px; color:#9fd5ff }
+  .sec pre { white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0f1722; padding:10px; border-radius:10px; border:1px solid #1c2a3b; color:#dbeafe; }
+  .dlg-foot { display:flex; justify-content:space-between; padding:12px 16px; border-top:1px solid #1a2330 }
+  .btn { padding:10px 14px; border-radius:12px; border:1px solid #223042; background:#0f151d; color:var(--text); cursor:pointer }
+  .btn.primary { background:linear-gradient(90deg, var(--accent), var(--accent2)); color:#041016; border:none; font-weight:700 }
+  .footnote { color:var(--muted); font-size:11px; padding:0 20px 18px }
+  .kbd { font-family:ui-monospace, SFMono, Menlo, Consolas, monospace; border:1px solid #304256; padding:2px 6px; border-radius:6px; background:#0a121b; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Tra cứu lỗi sản xuất gạch — 24 lỗi trọng yếu</h1>
+    <div class="sub">Gõ <span class="kbd">mã lỗi</span> (1–24) hoặc một phần <span class="kbd">tên lỗi</span> rồi Enter để mở nhanh. Nội dung giữ nguyên theo tài liệu gốc.</div>
+    <div class="searchbox">
+      <input id="q" type="search" placeholder="VD: 1 hoặc 'Phân lớp'…" autocomplete="off">
+      <button id="go" class="btn primary">Mở</button>
+    </div>
+  </div>
+</header>
+
+<main class="grid" id="cards"></main>
+
+<dialog id="dlg">
+  <div class="dlg-header">
+    <span class="tag" id="dlg-code">Mã 0</span>
+    <div style="font-size:16px;font-weight:700" id="dlg-name"></div>
+  </div>
+  <div class="dlg-body">
+    <div class="cols">
+      <div>
+        <div class="imgph" id="dlg-img">Chưa có ảnh minh họa</div>
+      </div>
+      <div>
+        <div class="sec">
+          <h3>🧭 Dấu hiệu nhận biết</h3>
+          <pre id="dlg-signs"></pre>
+        </div>
+        <div class="sec">
+          <h3>🧪 Nguyên nhân gây lỗi</h3>
+          <pre id="dlg-causes"></pre>
+        </div>
+        <div class="sec">
+          <h3>🛠️ Biện pháp khắc phục</h3>
+          <pre id="dlg-fixes"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="dlg-foot">
+    <button class="btn" id="close">Đóng</button>
+    <button class="btn" id="copy">Sao chép nội dung</button>
+  </div>
+</dialog>
+
+<div class="footnote">© Portal nội bộ. Bản HTML đơn — có thể mở offline, chia sẻ qua Zalo/Drive. Hỗ trợ thêm ảnh/QR từng lỗi khi cần.</div>
+
+<script>
+const DATA = [
+  {
+    "ma_loi": 1,
+    "ten_loi": "Phân lớp",
+    "dau_hieu": "+ Trên bề mặt gạch mộc có hiện tượng phồng trắng.\n+ Tại cạnh các viên gạch có hiện tượng phân tách (không liên kết).\n+ Khi bẻ sản phẩm sau nung có hiện tượng phân tầng tách thành từng lớp không kết khối với nhau.",
+    "nguyen_nhan": "TSKT bột liệu:\n+ Độ ẩm bột liệu trước ép quá khô hoặc quá ẩm.\n+ Kích thước hạt của bột liệu trước ép tỷ lệ hạt mịn nhiều.\n+ Thành phần bài phối liệu chưa hợp lý.\nLỗi thiết bị:\n+ Kẹt vành - chày, vành - chày bị mòn.",
+    "bien_phap": "+ Điều chỉnh độ ẩm bột liệu trước ép đúng quy định.\n+ Điều chỉnh cỡ hạt của bột liệu đúng quy định.\n+ Điều chỉnh lại vành - chày hoặc thay thế thiết bị.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 2,
+    "ten_loi": "Nứt xương",
+    "dau_hieu": "+ Trên bề mặt/ các cạnh của sản phẩm trước/ sau nung có hiện tượng nứt.",
+    "nguyen_nhan": "Lỗi thiết bị:\n+ Lệch chày trên, chày dưới; thanh đẩy gạch mòn; lực tì máy in lưới cao hoặc không đều.\n+ Dẫn hướng, dây đai, dàn con lăn không cân bằng dẫn đến gạch bị va đập trong quá trình di chuyển.\nCơ lý sản phẩm mộc không đạt:\n+ Cường độ mộc thấp.\n+ Bị sốc nhiệt trong quá trình sấy.",
+    "bien_phap": "+ Điều chỉnh chày trên/ dưới.\n+ Thay thế thanh đẩy gạch.\n+ Điều chỉnh máy in.\n+ Điều chỉnh lại dây đai, dẫn hướng, dàn con lăn.\n+ Điều chỉnh áp lực ép phù hợp.\n+ Điều chỉnh nhiệt độ sấy phù hợp, đúng tiêu chuẩn.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 3,
+    "ten_loi": "Khuyết tật hình học – Eo thắt lọ hoa, hình thang",
+    "dau_hieu": "Hình dạng của sản phẩm bị biến dạng, các cạnh không vuông góc hoặc lõm ở hai cạnh đối diện sai so với thiết kế.",
+    "nguyen_nhan": "Lỗi thiết bị:\n+ Khuôn chày mòn không đều.\n+ Hệ thống điều chỉnh chiều dày hoạt động không ổn định.\n+ Dải liệu không đều.",
+    "bien_phap": "+ Thay thế khuôn chày.\n+ Điều chỉnh thanh gạt liệu.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 4,
+    "ten_loi": "Sứt góc, bở mép cạnh",
+    "dau_hieu": "Trên bề mặt/ gầm sản phẩm bị mất 1 phần góc hoặc cạnh.",
+    "nguyen_nhan": "TSKT bột liệu:\n+ Độ ẩm của bột liệu quá khô.\n+ Kích thước hạt của bột liệu không đạt yêu cầu.\nLỗi thiết bị:\n+ Vành chày mòn, lệch chày…\n+ Dẫn hướng, dây đai, dàn con lăn không cân bằng dẫn đến gạch bị va đập trong quá trình di chuyển.",
+    "bien_phap": "+ Điều chỉnh độ ẩm, kích thước hạt theo quy định.\n+ Điều chỉnh máy hoặc thay thế thiết bị.\n+ Điều chỉnh cường độ mộc sau ép theo quy định.\n+ Điều chỉnh lại dây đai, dẫn hướng, dàn con lăn.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 5,
+    "ten_loi": "Ba via",
+    "dau_hieu": "Trên bề mặt/ đế của sản phẩm sau ép/ sau nung xuất hiện phần thừa tại quá trình tạo hình sản phẩm.",
+    "nguyen_nhan": "Lỗi thiết bị: Do khuôn, chày bị mòn.",
+    "bien_phap": "+ Thay thế khuôn chày.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 6,
+    "ten_loi": "Dính vành dính chày",
+    "dau_hieu": "Trên bề mặt sản phẩm/ cạnh gạch có vết sẫn/ lõm do thừa/ thiếu liệu bởi bị dính vành, dính chày gây ra.",
+    "nguyen_nhan": "TSKT bột liệu:\n+ Bột liệu ủ chưa đủ thời gian để đảm bảo đồng đều chất lượng.\n+ Độ ẩm bột liệu ép quá cao.\nLỗi thiết bị:\n+ Cao su mặt chày không đảm bảo độ chống dính.",
+    "bien_phap": "+ Ủ bột liệu sấy phun đúng quy định.\n+ Điều chỉnh độ ẩm bột liệu ép đúng quy định.\n+ Thay chày mới.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 7,
+    "ten_loi": "Chiều dày không ổn định",
+    "dau_hieu": "Độ dày trên các cạnh/ trên cả viên không đồng đều. Cao hoặc thấp hơn so với quy định.",
+    "nguyen_nhan": "Lỗi thiết bị: Hệ thống dải liệu không đều (xé dải liệu dọc/ ngang), hệ thống điều chỉnh chiều dày SMU hoạt động không ổn định.",
+    "bien_phap": "+ Kiểm tra và khắc phục hệ thống dải liệu.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 8,
+    "ten_loi": "U lồi",
+    "dau_hieu": "Bề mặt sản phẩm xuất hiện u, cục lồi lên.",
+    "nguyen_nhan": "Liệu lẫn tạp chất:\n- Lẫn cộm, bã liệu; than; cao su băng tải; dầu, mạt sắt.\nLỗi thiết bị:\n+ Thủng sàng quay.",
+    "bien_phap": "+ Kiểm tra hệ thống cấp liệu: các vị trí rớt dầu; phát sinh cao su, mạt sắt.\n+ Thay lưới sàng quay.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 9,
+    "ten_loi": "Lõm mặt",
+    "dau_hieu": "Trên bề mặt sản phẩm hoặc các mép viên gạch.",
+    "nguyen_nhan": "Lỗi thiết bị:\n+ Chày dưới bị dính liệu.\n+ Chày dưới bị bong cao su.\n+ Chày dưới bị ép vào dị vật.",
+    "bien_phap": "+ Kiểm tra chày dưới để vệ sinh hoặc thay thế.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 10,
+    "ten_loi": "Châm kim",
+    "dau_hieu": "Trên bề mặt sản phẩm hoặc các mép viên gạch xuất hiện các nốt tròn nhỏ, lõm xuống đến engobe/ xương.",
+    "nguyen_nhan": "TSKT:\n+ Nhiệt độ lò sấy không phù hợp; nhiệt độ mặt gạch cao.\n+ Phun ẩm không đều, thiếu hoặc thừa ẩm so với quy định.\nLỗi thiết bị:\n+ Bề mặt sản phẩm bị bẩn.\n+ Men, nước pha men lẫn tạp chất (dầu, dung môi…).",
+    "bien_phap": "+ Điều chỉnh nhiệt độ sấy theo quy định.\n+ Điều chỉnh pẹp phun ẩm cho đồng đều và đảm bảo độ bám theo quy định.\n+ Kiểm tra thiết bị thổi bụi mặt gạch và điều chỉnh.\n+ Kiểm tra chất lượng của men và nước để thay thế.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 11,
+    "ten_loi": "Sôi men",
+    "dau_hieu": "Bề mặt sản phẩm xuất hiện những nốt nhỏ dạng bọt khí tập trung thành từng mảng.",
+    "nguyen_nhan": "TSKT:\n+ Bột liệu xương mịn quá hoặc thô quá.\n+ Engobe/ men bóng có độ sót sàng thấp.\n+ Chế độ nung không phù hợp làm cho men chảy sớm.\nLỗi nguyên liệu đầu vào:\n+ Bột liệu/ men bị lẫn tạp chất ảnh hưởng thoát khí (dầu, dung môi…).\n+ Engobe/ men/ màu in bị chảy, giảm khả năng thoát khí.\nLỗi thiết bị (trường hợp sôi ở 1 hốc khuôn):\n+ Độ dày không ổn định.\n+ Lực ép quá cao.",
+    "bien_phap": "+ Kiểm tra TSKT xương, engobe, men so với tiêu chuẩn; điều chỉnh đạt tiêu chuẩn.\n+ Kiểm tra đường cong nung, điều chỉnh đúng tiêu chuẩn.\n+ Kiểm tra chất lượng của bột liệu xương/ men để điều chỉnh, thay thế.\n+ Kiểm tra chất lượng engobe/ men/ màu in so với tiêu chuẩn; điều chỉnh đảm bảo thoát khí.\n+ Giảm chu kỳ nung khắc phục sự cố.\n+ Điều chỉnh dải liệu.\n+ Điều chỉnh giảm áp lực ép.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 12,
+    "ten_loi": "Sóng men",
+    "dau_hieu": "Trên bề mặt men phủ bị lượn sóng, gồ ghề không láng đều.",
+    "nguyen_nhan": "TSKT:\n+ Độ nhớt men thấp, không đạt tiêu chuẩn.\nLỗi thiết bị:\n+ Buly, động cơ, dây đai, dẫn hướng bị mòn không đều gây rung giật sản phẩm khi di chuyển.\n+ Áp lực bơm men lớn ảnh hưởng độ bám, độ đồng đều về lượng men tráng trên viên gạch.",
+    "bien_phap": "+ Điều chỉnh độ nhớt men đạt tiêu chuẩn.\n+ Kiểm tra hệ thống chuyền dẫn (buly, động cơ, dây đai, dẫn hướng) để thay thế khi không đảm bảo.\n+ Khắc phục và điều chỉnh thiết bị (giảm áp lực bơm, tăng tốc độ động cơ để đảm bảo đồng đều khoảng cách các viên gạch).",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 13,
+    "ten_loi": "Co, lõm men",
+    "dau_hieu": "Trên bề mặt sản phẩm có những nốt tròn lõm dạng men không được điền đầy, có những nốt không có men.",
+    "nguyen_nhan": "TSKT:\n+ Phun thừa ẩm; độ nhớt men thấp; nhiệt độ sấy cao.\nLỗi nguyên liệu đầu vào:\n+ Men bị lẫn tạp chất (dầu, dung môi…); men để lâu ngày chất lượng xuống cấp; men kém dẻo.",
+    "bien_phap": "+ Điều chỉnh lượng phun ẩm đúng tiêu chuẩn.\n+ Điều chỉnh độ nhớt men đạt tiêu chuẩn.\n+ Điều chỉnh nhiệt độ sấy phù hợp.\n+ Kiểm tra chất lượng men ướt để điều chỉnh hoặc thay thế.\n+ Chỉnh tăng dẻo cho men.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 14,
+    "ten_loi": "Vệt men",
+    "dau_hieu": "Bề mặt men sau tráng/ sau nung xuất hiện vệt dài khác màu so với sản phẩm.",
+    "nguyen_nhan": "Lỗi nguyên liệu đầu vào:\n+ Men lẫn tạp chất (dung môi, dầu, bụi bẩn...).\n+ Men bị đông, vón cục mắc ở màng men đang tráng trên vera, chuông.\n+ Khuyết tật trên chuông tráng.\n+ Hơi nước bốc lên từ bề mặt gạch lên vera/ chuông men tạo vệt nước.\nLỗi thiết bị:\n+ Khuyết tật trên vera hoặc chuông tráng men (mẻ dao, xước chuông).\n+ Sàng lọc men bị rách.",
+    "bien_phap": "+ Kiểm tra độ sạch của men tiến hành sàng lại hoặc thay thế.\n+ Kiểm tra độ đông men, điều chỉnh xử lý men đông hoặc thay thế.\n+ Kiểm tra khoảng cách giữa phun ẩm với tráng men và quạt thổi hơi nước; điều chỉnh nếu sai khác.\n+ Kiểm tra thiết bị tráng men để thay thế/ sửa chữa.\n+ Kiểm tra sàng lọc men và thay thế.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 15,
+    "ten_loi": "Rách màng men (Oval)",
+    "dau_hieu": "Trên bề mặt sản phẩm có hình oval mất men, hở xương hoặc engobe.",
+    "nguyen_nhan": "TSKT:\n+ Độ nhớt, tỷ trọng men thấp.\nLỗi thiết bị:\n+ Khuyết tật trên vera hoặc chuông tráng men.\n+ Tốc độ khuấy men lớn gây bọt khí men và vỡ trên vera/ chuông tráng.\n+ Khe hở giữa 2 dao tráng men chưa đều nhau.\nLỗi nguyên liệu đầu vào:\n+ Men lẫn tạp chất (dung môi, dầu, bụi bẩn...).\n+ Sàng lọc men bị rách.",
+    "bien_phap": "+ Điều chỉnh độ nhớt men đạt tiêu chuẩn.\n+ Kiểm tra độ sạch của men tiến hành sàng lại hoặc thay thế.\n+ Vệ sinh và kiểm tra thiết bị tráng men.\n+ Giảm tốc độ cánh khuấy men.\n+ Kiểm tra, căn chỉnh khe hở giữa 2 dao tráng men.\n+ Kiểm tra sàng lọc men và thay thế.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 16,
+    "ten_loi": "Phồng, rộp men",
+    "dau_hieu": "Bề mặt men sau khi tráng/ sau nung có hiện tượng phồng rộp, sùi mụn từng đám.",
+    "nguyen_nhan": "TSKT:\n+ Phun thừa ẩm; độ nhớt, tỷ trọng men thấp; tráng men vượt độ bám cho phép; nhiệt độ sấy không đạt.\nLỗi nguyên liệu đầu vào:\n+ Men thừa dẻo làm giảm tốc độ khô sau tráng.\n+ Lượng cao lanh, phụ gia CMC không phù hợp.",
+    "bien_phap": "+ Điều chỉnh lượng phun ẩm, tráng men đúng tiêu chuẩn.\n+ Điều chỉnh độ nhớt, tỷ trọng men đạt tiêu chuẩn.\n+ Điều chỉnh nhiệt độ sấy đảm bảo độ ẩm gạch sau sấy.\n+ Kiểm tra chất lượng men ướt để điều chỉnh hoặc thay thế.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 17,
+    "ten_loi": "Xước màu (máy in KTS)",
+    "dau_hieu": "Trên bề mặt in trang trí có vết xước trắng kéo dài theo chiều in sai khác so với thiết kế (viên chuẩn).",
+    "nguyen_nhan": "Lỗi thiết bị:\n+ Đầu in bị tắc không bơm mực đều.\nLỗi nguyên liệu đầu vào:\n+ Mực in bị lắng, vón cục.",
+    "bien_phap": "+ Kiểm tra đầu in, vệ sinh hoặc thay thế.\n+ Kiểm tra chất lượng mực in, hạn sử dụng và thay thế.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 18,
+    "ten_loi": "Dính lưới, dây màu, vệt màu, đậm mép, nhòe màu",
+    "dau_hieu": "Trên bề mặt in trang trí có các điểm/ vệt đậm màu, nhòe màu sai khác so với thiết kế (viên chuẩn).",
+    "nguyen_nhan": "TSKT:\n+ Tỷ trọng, độ nhớt màu in thấp hơn quy định gây nhòe, dính lưới.\nLỗi thiết bị:\n+ Khoảng cách (chiều cao) từ mặt gạch đến lưới in/ đầu in/ trục in không đều.\n+ Dây đai bị mòn không đều.\n+ Cảm biến đầu vào (sensor) bẩn không nhận biết sản phẩm khi vào in.\n+ Lưới in, đầu in, mặt lô bẩn.\n+ Bàn gạt cùn; dao bị mòn, cong lượn; lưới in bị lỗi.",
+    "bien_phap": "+ Kiểm tra TSKT của màu in và điều chỉnh hoặc thay thế.\n+ Điều chỉnh thiết bị in, dây đai nếu sai khác; đảm bảo độ cao và đồng đều.\n+ Vệ sinh/ kiểm tra sensor đầu vào; đầu in, lưới in, mặt lô.\n+ Điều chỉnh bàn gạt, dao lô đảm bảo sắc, phẳng.\n+ Kiểm tra chất lượng lưới in và thay thế, chỉnh sửa.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 19,
+    "ten_loi": "Nhạt màu, mất màu",
+    "dau_hieu": "Trên bề mặt in trang trí có các điểm mất màu hoặc nhạt hơn sai khác so với thiết kế (viên chuẩn).",
+    "nguyen_nhan": "TSKT:\n+ Tỷ trọng, độ nhớt màu in thấp/ cao hơn quy định ảnh hưởng độ thoát lưới.\n+ Độ mịn của màu in chưa đạt.\nLỗi thiết bị:\n+ Khoảng cách từ mặt gạch đến lưới/ đầu in/ trục in không đều; dây đai mòn không đều.\n+ Sensor đầu vào bẩn; lưới/ đầu in/ mặt lô bẩn hoặc khô màu gây tắc mực.\n+ Dao lô mòn, mẻ, cong lượn; bàn gạt cùn.\nLỗi nguyên liệu đầu vào:\n+ Nghiền sai đơn phối liệu; độ bay hơi dung môi quá cao gây khô nhanh trên lưới; màu in bị lắng; lưới in không đúng cỡ; in KTS sai face thiết kế.",
+    "bien_phap": "+ Kiểm tra màu in so mới màu chuẩn; điều chỉnh/ thay thế.\n+ Kiểm tra độ mịn màu, nghiền thêm đạt độ mịn.\n+ Kiểm tra và vệ sinh sensor, đầu in, lưới in, mặt lô.\n+ Kiểm tra dao lô, bàn gạt đảm bảo sắc, phẳng.\n+ Điều chỉnh độ linh động của màu in; giảm tốc độ khô trên lưới.\n+ Kiểm tra lưới in; kiểm tra face thiết kế đảm bảo đúng và đủ.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 20,
+    "ten_loi": "Lệch màu trên viên, Khác màu",
+    "dau_hieu": "Trên bề mặt in trang trí bị lệch màu phải trái, trước sau hoặc khác màu so với thiết kế (viên chuẩn).",
+    "nguyen_nhan": "Lỗi thiết bị:\n+ Dây đai mòn không đều ảnh hưởng khoảng cách từ bề mặt gạch lên thiết bị in.\n+ Lượng màu in trên đầu bò, bàn gạt, dao gạt không đều.\n+ Áp lực phun mực không đều giữa các modul.\n+ Buly, động cơ, dây đai, dẫn hướng mòn không đều gây rung giật sản phẩm.\n+ Áp lực bơm men lớn ảnh hưởng độ bám, độ đồng đều lượng men.\nLỗi nguyên liệu đầu vào:\n+ Nghiền sai đơn phối liệu màu in; tỷ trọng, độ nhớt men không đạt.",
+    "bien_phap": "+ Kiểm tra đầu in, vệ sinh hoặc thay thế; kiểm tra lắp đặt hệ thống in trang trí.\n+ Điều chỉnh lượng màu trên bàn gạt, dao gạt đảm bảo đồng đều.\n+ Kiểm tra hệ thống chuyền dẫn để thay thế khi không đảm bảo.\n+ Khắc phục và điều chỉnh thiết bị (giảm áp lực bơm, tăng tốc độ động cơ).\n+ Kiểm tra chất lượng màu in; điều chỉnh hoặc thay thế.\n+ Kiểm tra và điều chỉnh TSKT men.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 21,
+    "ten_loi": "Lệch lưới, lệch chỉ",
+    "dau_hieu": "Trên bề mặt in trang trí các điểm hoa văn của các lưới in không ăn khớp.",
+    "nguyen_nhan": "Lỗi thiết bị:\n+ Lắp đặt lưới in, đầu bò, lô trục không đúng yêu cầu bị lệch lưới, lệch lô.\n+ Buly, động cơ, dây đai, dẫn hướng mòn không đều gây rung giật sản phẩm.\n+ Lưới in bị vặn hoặc không đúng độ co.",
+    "bien_phap": "+ Kiểm tra lắp đặt và điều chỉnh theo tiêu chuẩn.\n+ Kiểm tra hệ thống chuyền dẫn để thay thế khi không đảm bảo.\n+ Kiểm tra chất lượng lưới in và thay thế, chỉnh sửa.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 22,
+    "ten_loi": "Bong, tróc men",
+    "dau_hieu": "Bề mặt hoặc mép cạnh của sản phẩm có hiện tượng lớp engobe/ men bị bong tróc tách ra khỏi lớp bên dưới (xương, engobe) dưới dạng vảy.",
+    "nguyen_nhan": "TSKT:\n+ Hệ số giãn nở nhiệt của xương/ engobe/ men không tương thích.\n+ Chế độ nung không phù hợp (nhiệt độ nung thấp, chu kỳ nung nhanh).\nLỗi thiết bị:\n+ Dẫn hướng và dây đai không cân bằng dẫn đến gạch bị va chạm.\n+ Cạo cạnh không đạt yêu cầu.",
+    "bien_phap": "+ Kiểm tra COE của xương/ engobe/ men để điều chỉnh hoặc thay thế.\n+ Điều chỉnh chế độ nung (giảm chu kỳ hoặc tăng nhiệt độ).\n+ Điều chỉnh dẫn hướng và dây đai đảm bảo khoảng cách di chuyển.\n+ Kiểm tra đá và cạo cạnh theo đúng tần suất quy định.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 23,
+    "ten_loi": "Rạn men",
+    "dau_hieu": "Bề mặt sản phẩm xuất hiện các vết nứt rất nhỏ dạng chân chim không sâu đến xương.",
+    "nguyen_nhan": "TSKT:\n+ Hệ số giãn nở nhiệt của xương/ engobe/ men không tương thích.\n+ Nhiệt sấy và độ ẩm gạch sau sấy biến động.\n+ Chế độ nung không phù hợp (nhiệt độ nung thấp, chu kỳ nung nhanh).\nTrường hợp rạn lớp màu in do bài phối liệu không đồng nhất (dung môi, men in, bột màu kém chảy, kém dẻo và tỷ trọng màu in quá cao).",
+    "bien_phap": "+ Kiểm tra COE của xương/ engobe/ men để điều chỉnh hoặc thay thế.\n+ Kiểm tra và điều chỉnh chế độ sấy.\n+ Điều chỉnh chế độ nung (giảm chu kỳ hoặc tăng nhiệt độ).\n+ Kiểm tra tỷ trọng màu in và độ chảy của men in và bột màu.",
+    "hinh_anh": null
+  },
+  {
+    "ma_loi": 24,
+    "ten_loi": "Nứt tóc",
+    "dau_hieu": "Sản phẩm xuất hiện các vết nứt rất mảnh và sắc có thể xuyên suốt bề dày sản phẩm.",
+    "nguyen_nhan": "+ Do nhiệt độ của mặt men (nhiệt trên viên gạch) khi qua vùng làm lạnh nhanh có nhiệt độ nhỏ hơn điểm chuyển đổi cấu hình của SiO2 từ cấu hình α sang β.\n+ Tốc độ làm lạnh ở vùng làm lạnh nhanh của lò nung quá lớn làm cho viên gạch khi qua khỏi vùng này có nhiệt độ nhỏ hơn 573°C.\n+ Do trống lò nhiệt độ vùng làm lạnh nhanh bị mất nhiệt.\n+ Nứt tóc ở vùng trao đổi nhiệt: biểu hiện ở vùng này là vết nứt thẳng, ngắn, vết nứt láng bóng.",
+    "bien_phap": "+ Khi nứt ở 2 bên rìa lò thì hạn chế bớt gió lạnh ở phía ngoài lò (nhét bông thủy tinh giữa các khe con lăn).\n+ Nếu nứt cả ở giữa lò thì đóng hoặc hãm bớt van tổng của quạt làm lạnh nhanh, hoặc đóng một hay hai van của ống làm lạnh nhanh phía vùng nung.\n+ Tùy dòng gạch và kích thước gạch mà điều chỉnh tốc độ làm lạnh nhanh cho phù hợp.",
+    "hinh_anh": null
+  }
+];
+
+const cards = document.getElementById('cards');
+const dlg   = document.getElementById('dlg');
+const dlgCode  = document.getElementById('dlg-code');
+const dlgName  = document.getElementById('dlg-name');
+const dlgImg   = document.getElementById('dlg-img');
+const dlgSigns = document.getElementById('dlg-signs');
+const dlgCauses= document.getElementById('dlg-causes');
+const dlgFixes = document.getElementById('dlg-fixes');
+const q     = document.getElementById('q');
+const goBtn = document.getElementById('go');
+
+function renderCards(list) {
+  cards.innerHTML = '';
+  list.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.innerHTML = `
+      <div class="code">Mã ${
+        String(item.ma_loi).padStart(2,'0')
+      }</div>
+      <div class="name">${item.ten_loi}</div>
+      <div class="muted">Nhấp để xem chi tiết</div>
+    `;
+    el.addEventListener('click', () => openDetail(item));
+    cards.appendChild(el);
+  });
+}
+
+function openDetail(item) {
+  dlgCode.textContent = 'Mã ' + item.ma_loi;
+  dlgName.textContent = item.ten_loi;
+  dlgImg.textContent  = item.hinh_anh ? '' : 'Chưa có ảnh minh họa';
+  if (item.hinh_anh) {
+    dlgImg.innerHTML = `<img src="${item.hinh_anh}" alt="hình minh họa" style="width:100%;height:100%;object-fit:cover">`;
+  }
+  dlgSigns.textContent = item.dau_hieu || '';
+  dlgCauses.textContent= item.nguyen_nhan || '';
+  dlgFixes.textContent = item.bien_phap || '';
+  dlg.showModal();
+}
+
+function searchOpen() {
+  const key = (q.value || '').trim().toLowerCase();
+  if (!key) return;
+  let found = null;
+  // Ưu tiên tìm theo mã số
+  if (/^\d+$/.test(key)) {
+    const code = parseInt(key, 10);
+    found = DATA.find(x => x.ma_loi === code);
+  }
+  // Fallback: tìm theo tên
+  if (!found) {
+    found = DATA.find(x => (x.ten_loi||'').toLowerCase().includes(key));
+  }
+  if (found) {
+    openDetail(found);
+  } else {
+    alert('Không tìm thấy lỗi phù hợp. Hãy nhập mã (1–24) hoặc một phần tên lỗi.');
+  }
+}
+
+document.getElementById('close').addEventListener('click', () => dlg.close());
+document.getElementById('copy').addEventListener('click', () => {
+  const txt = [
+    dlgName.textContent,
+    '\n' + dlgCode.textContent,
+    '\n\n🧭 Dấu hiệu:\n' + dlgSigns.textContent,
+    '\n\n🧪 Nguyên nhân:\n' + dlgCauses.textContent,
+    '\n\n🛠️ Khắc phục:\n' + dlgFixes.textContent
+  ].join('');
+  navigator.clipboard.writeText(txt);
+});
+
+q.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') searchOpen();
+});
+goBtn.addEventListener('click', searchOpen);
+
+renderCards(DATA);
+</script>
+</body>
+</html>
